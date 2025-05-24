@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.2/socket.io.js"></script>
+</head>
+
+<body>
+    <div class="wrapper">
+        <nav id="sidebar">
+            <div class="sidebar-header">
+                <h3>Menu</h3>
+                <button id="sidebarToggle" class="btn btn-outline-light"><i class="fas fa-bars"></i></button>
+            </div>
+            <ul class="list-unstyled components">
+                <li>
+                    <a href="/"><i class="fas fa-server"></i> <span class="menu-text">Servers</span></a>
+                </li>
+                <li>
+                    <a href="/dashboard"><i class="fas fa-tachometer-alt"></i> <span class="menu-text">Dashboard</span></a>
+                </li>
+                <li>
+                    <a href="/monitor"><i class="fas fa-chart-line"></i> <span class="menu-text">Monitors</span></a>
+                </li>
+                <li>
+                    <a href="/management"><i class="fas fa-database"></i> <span class="menu-text">Management</span></a>
+                </li>
+                <li>
+                    <a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> <span class="menu-text">Logout</span></a>
+                </li>
+            </ul>
+        </nav>
+
+        <div id="content">
+            <div class="container-fluid">
+                <div class="header">
+                    <h1 class="text-center"><i class="fas fa-chart-bar"></i> Dashboard</h1>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <h5 class="card-title">Host Stats</h5>
+                                <canvas id="hostChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <h5 class="card-title">Database Availability</h5>
+                                <div id="dbAvailabilityContainer"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <h5 class="card-title">Query Statistics</h5>
+                                <canvas id="queryStatsChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <h5 class="card-title">Query Counts</h5>
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Command</th>
+                                            <th>Count</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for command, count in total_queries.items() %}
+                                        <tr>
+                                            <td>{{ command }}</td>
+                                            <td>{{ count }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                        <tr>
+                                            <th>Total</th>
+                                            <th>{{ total_queries.values() | sum }}</th>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='sidebar.js') }}"></script>
+    <script src="{{ url_for('static', filename='dashboard.js') }}"></script>
+    <script src="{{ url_for('static', filename='monitor.js') }}"></script>
+</body>
+
+</html>

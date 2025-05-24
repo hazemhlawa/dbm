@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.2/socket.io.js"></script>
+</head>
+
+<body>
+    <div class="wrapper">
+        <nav id="sidebar">
+            <div class="sidebar-header">
+                <h3>Menu</h3>
+                <button id="sidebarToggle" class="btn btn-outline-light"><i class="fas fa-bars"></i></button>
+            </div>
+            <ul class="list-unstyled components">
+                <li>
+                    <a href="/"><i class="fas fa-server"></i> <span class="menu-text">Servers</span></a>
+                </li>
+                <li>
+                    <a href="/dashboard"><i class="fas fa-tachometer-alt"></i> <span class="menu-text">Dashboard</span></a>
+                </li>
+                <li>
+                    <a href="/monitor"><i class="fas fa-chart-line"></i> <span class="menu-text">Monitors</span></a>
+                </li>
+                <li>
+                    <a href="/management"><i class="fas fa-database"></i> <span class="menu-text">Management</span></a>
+                </li>
+                <li>
+                    <a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> <span class="menu-text">Logout</span></a>
+                </li>
+            </ul>
+        </nav>
+
+        <div id="content">
+            <div class="container-fluid">
+                <div id="alert-container"></div> <!-- Alert container for messages -->
+                <div class="header">
+                    <h1 class="text-center"><i class="fas fa-database"></i> Database Management</h1>
+                </div>
+                <div class="form-group">
+                    <form id="addDatabaseForm" action="{{ url_for('management.add_database') }}" method="post">
+                        <label for="host">Host:</label>
+                        <input type="text" class="form-control" id="host" name="host" required>
+                        <label for="port">Port:</label>
+                        <input type="text" class="form-control" id="port" name="port" required>
+                        <label for="user">User:</label>
+                        <input type="text" class="form-control" id="user" name="user" required>
+                        <label for="password">Password:</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                        <label for="database">Database:</label>
+                        <input type="text" class="form-control" id="database" name="database" required>
+                        <button type="submit" class="btn btn-primary mt-2">Add Database</button>
+                    </form>
+                </div>
+                <div class="form-group">
+                    <h2>Manage Databases</h2>
+                    <ul id="databasesList" class="list-group">
+                        {% for db in databases %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>{{ db.host }}:{{ db.port }} - {{ db.database }}</span>
+                            <div class="btn-group">
+                                <form action="{{ url_for('management.start_database') }}" method="post" class="mr-2">
+                                    <input type="hidden" name="host" value="{{ db.host }}">
+                                    <input type="hidden" name="port" value="{{ db.port }}">
+                                    <button type="submit" class="btn btn-success btn-sm">Start</button>
+                                </form>
+                                <form action="{{ url_for('management.stop_database') }}" method="post" class="mr-2">
+                                    <input type="hidden" name="host" value="{{ db.host }}">
+                                    <input type="hidden" name="port" value="{{ db.port }}">
+                                    <button type="submit" class="btn btn-danger btn-sm">Stop</button>
+                                </form>
+                                <form action="{{ url_for('management.restart_database') }}" method="post" class="mr-2">
+                                    <input type="hidden" name="host" value="{{ db.host }}">
+                                    <input type="hidden" name="port" value="{{ db.port }}">
+                                    <button type="submit" class="btn btn-warning btn-sm">Restart</button>
+                                </form>
+                                <form action="{{ url_for('management.remove_database') }}" method="post">
+                                    <input type="hidden" name="index" value="{{ loop.index0 }}">
+                                    <button type="submit" class="btn btn-secondary btn-sm">Remove</button>
+                                </form>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='sidebar.js') }}"></script>
+    <script src="{{ url_for('static', filename='management.js') }}"></script>
+</body>
+
+</html>
