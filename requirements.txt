@@ -1,5 +1,5 @@
 Flask==2.2.2
 Werkzeug==2.2.2
-Flask-SocketIO==5.1.0
+Flask-SocketIO==5.2.0  # Update to a compatible version
 Flask-SQLAlchemy==2.5.1
 mysql-connector-python==8.0.25
