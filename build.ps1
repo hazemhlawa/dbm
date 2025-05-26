@@ -10,7 +10,7 @@ docker buildx create --name dbm-builder --use
 
 # Build and push multi-platform image
 docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 `
-    -t "$DOCKER_USERNAME/$IMAGE_NAME:latest" `
+    -t "${DOCKER_USERNAME}/${IMAGE_NAME}:latest" `
     -t "${DOCKER_USERNAME}/${IMAGE_NAME}:${VERSION}" `
     --push `
     .
