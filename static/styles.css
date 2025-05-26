@@ -1,0 +1,239 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+body {
+    background-color: #f4f7f6;
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    display: flex;
+}
+
+.wrapper {
+    display: flex;
+    width: 100%;
+}
+
+#sidebar {
+    width: 250px;
+    height: 100vh;
+    background: #343a40;
+    color: #fff;
+    position: fixed;
+    top: 0;
+    left: 0;
+    padding: 20px;
+    transition: all 0.3s;
+}
+
+#sidebar.minimized {
+    width: 80px;
+    padding: 10px;
+}
+
+#sidebar .sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background: #212529;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    transition: all 0.3s;
+}
+
+#sidebar.minimized .sidebar-header h3,
+#sidebar.minimized .menu-text {
+    display: none;
+}
+
+#sidebar ul.components {
+    padding: 0;
+    list-style: none;
+}
+
+#sidebar ul li {
+    padding: 10px;
+    font-size: 1.1em;
+    display: flex;
+    align-items: center;
+}
+
+#sidebar.minimized ul li {
+    justify-content: center;
+}
+
+#sidebar ul li a {
+    color: #fff;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    transition: all 0.3s;
+}
+
+#sidebar.minimized ul li a {
+    justify-content: center;
+}
+
+#sidebar ul li a:hover {
+    background: #007bff;
+    border-radius: 5px;
+    text-decoration: none;
+}
+
+#sidebar ul li a i {
+    margin-right: 10px;
+    font-size: 1.2em;
+}
+
+#sidebar.minimized ul li a i {
+    margin-right: 0;
+}
+
+#sidebar ul li a .menu-text {
+    margin-left: 10px;
+}
+
+#content {
+    width: calc(100% - 250px);
+    margin-left: 250px;
+    padding: 20px;
+    transition: all 0.3s;
+}
+
+#content.minimized {
+    width: calc(100% - 60px);
+    margin-left: 60px;
+}
+
+.header {
+    background-color: #343a40;
+    color: #ffffff;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1rem;
+}
+
+h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0;
+    text-align: center;
+}
+
+.table-container {
+    overflow-x: auto;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 0.5rem;
+    background-color: #ffffff;
+    padding: 1rem;
+    width: 100%;
+}
+
+.table {
+    width: 100%;
+    margin-bottom: 1rem;
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.table th,
+.table td {
+    padding: 1rem;
+    vertical-align: middle;
+    text-align: center;
+}
+
+.table th {
+    background-color: #343a40;
+    color: #ffffff;
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.table td {
+    color: #495057;
+    transition: background-color 0.3s ease;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #e9ecef;
+}
+
+.table-bordered th,
+.table-bordered td {
+    border: 1px solid #dee2e6;
+}
+
+.table td:nth-child(10) {
+    text-align: left;
+}
+
+.container-fluid {
+    width: 100%;
+    padding: 1rem 2rem;
+    background-color: #f8f9fa;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    animation: fadeIn 1s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card-body canvas {
+    max-width: 100%;
+    height: auto;
+}
+
+@media (max-width: 768px) {
+    #sidebar {
+        width: 200px;
+    }
+
+    #sidebar.minimized {
+        width: 60px;
+    }
+
+    #content {
+        width: calc(100% - 200px);
+        margin-left: 200px;
+    }
+
+    #content.minimized {
+        width: calc(100% - 60px);
+        margin-left: 60px;
+    }
+
+    .table th,
+    .table td {
+        padding: 0.75rem;
+    }
+
+    h1 {
+        font-size: 2rem;
+    }
+
+    .container-fluid {
+        padding: 1rem;
+    }
+}
+
+html {
+    scroll-behavior: smooth;
+}

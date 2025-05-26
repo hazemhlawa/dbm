@@ -1,0 +1,88 @@
+from flask import Blueprint, render_template, request, jsonify
+import mysql.connector
+import subprocess
+import platform
+
+management_bp = Blueprint('management', __name__)
+
+databases = []
+
+@management_bp.route('/')
+def management():
+    return render_template('management.html', databases=databases)
+
+@management_bp.route('/add_database', methods=['POST'])
+def add_database():
+    host = request.form['host']
+    port = request.form['port']
+    user = request.form['user']
+    password = request.form['password']
+    database = request.form['database']
+    
+    try:
+        connection = mysql.connector.connect(
+            host=host,
+            port=port,
+            user=user,
+            password=password,
+            database=database
+        )
+        connection.close()
+        databases.append({
+            'host': host,
+            'port': port,
+            'user': user,
+            'password': password,
+            'database': database
+        })
+        return jsonify({"status": "success"})
+    except mysql.connector.Error as err:
+        return jsonify({"status": "error", "message": str(err)}), 400
+
+@management_bp.route('/remove_database', methods=['POST'])
+def remove_database():
+    index = int(request.form['index'])
+    if 0 <= index < len(databases):
+        databases.pop(index)
+    return jsonify({"status": "success"})
+
+def manage_database(command, host, port):
+    try:
+        mysql_service_name = 'MySQL80'  # Replace with the correct service name
+
+        if platform.system() == "Windows":
+            if command == 'start':
+                subprocess.run(['net', 'start', mysql_service_name], check=True)
+            elif command == 'stop':
+                subprocess.run(['net', 'stop', mysql_service_name], check=True)
+            elif command == 'restart':
+                subprocess.run(['net', 'stop', mysql_service_name], check=True)
+                subprocess.run(['net', 'start', mysql_service_name], check=True)
+        else:
+            if command == 'start':
+                subprocess.run(['service', 'mysql', 'start'], check=True)
+            elif command == 'stop':
+                subprocess.run(['service', 'mysql', 'stop'], check=True)
+            elif command == 'restart':
+                subprocess.run(['service', 'mysql', 'restart'], check=True)
+        return jsonify({"status": "success", "message": f"Database {command}ed successfully on {host}:{port}"})
+    except subprocess.CalledProcessError as e:
+        return jsonify({"status": "error", "message": f"Failed to {command} database on {host}:{port}: {str(e)}"}), 500
+
+@management_bp.route('/start_database', methods=['POST'])
+def start_database():
+    host = request.form['host']
+    port = request.form['port']
+    return manage_database('start', host, port)
+
+@management_bp.route('/stop_database', methods=['POST'])
+def stop_database():
+    host = request.form['host']
+    port = request.form['port']
+    return manage_database('stop', host, port)
+
+@management_bp.route('/restart_database', methods=['POST'])
+def restart_database():
+    host = request.form['host']
+    port = request.form['port']
+    return manage_database('restart', host, port)
