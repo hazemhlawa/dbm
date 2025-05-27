@@ -6,6 +6,7 @@ mysql-connector-python==8.0.25
 Flask-Bootstrap==3.3.7.1
 Flask-Login==0.6.2
 psutil==5.9.5
+matplotlib==3.9.2
 matplotlib==3.7.2  # Add for dashboard.py (used for plotting)
 seaborn==0.12.2  # Add for dashboard.py (used for plotting)
 tailer==0.4.1  # Add for utils.py (used for log tailing)
