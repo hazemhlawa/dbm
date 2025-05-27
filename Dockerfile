@@ -17,14 +17,17 @@ RUN apt-get update && apt-get install -y \
     libpng-dev \
     && rm -rf /var/lib/apt/lists/*
 
+# Upgrade pip and install dependencies
+RUN python3 -m pip install --no-cache-dir --upgrade pip
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN python3 -m pip install --no-cache-dir -v -r requirements.txt
 
 COPY . .
 
-RUN useradd -m dbmuser && chown -R dbmuser:dbmuser /app
+# Create non-root user and set permissions
+RUN useradd -m dbmuser && chown -R dbmuser:dbmuser /app /usr/local/lib/python3.12
 USER dbmuser
 
 EXPOSE 5000
 
-CMD ["python", "app.py"]
+CMD ["python3", "app.py"]
