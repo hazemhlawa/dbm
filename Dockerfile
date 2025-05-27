@@ -1,25 +1,26 @@
+# Use a multi-arch compatible Python base image
 FROM python:3.12-slim
 
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-ENV PYTHONPATH=/app
-
+# Set working directory
 WORKDIR /app
 
+# Install system dependencies for mysql-connector-python, matplotlib, and psutil
 RUN apt-get update && apt-get install -y \
     gcc \
     python3-dev \
-    default-libmysqlclient-dev \
+    libmysqlclient-dev \
+    pkg-config \
+    && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
+# Copy project files
 COPY . .
 
-RUN useradd -m dbmuser && chown -R dbmuser:dbmuser /app
-USER dbmuser
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
 
+# Expose port 5000
 EXPOSE 5000
 
+# Command to run the application
 CMD ["python", "app.py"]
