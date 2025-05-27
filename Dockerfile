@@ -7,10 +7,16 @@ WORKDIR /app
 # Install system dependencies for mysql-connector-python, matplotlib, and psutil
 RUN apt-get update && apt-get install -y \
     gcc \
+    g++ \
+    make \
     python3-dev \
     pkg-config \
-    && apt-get clean \
+    libfreetype6-dev \
+    libpng-dev \
+    libjpeg-dev \
+    default-libmysqlclient-dev \
     && rm -rf /var/lib/apt/lists/*
+
 
 # Copy project files
 COPY . .
