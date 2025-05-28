@@ -9,3 +9,5 @@ psutil==5.9.5
 matplotlib==3.9.2
 seaborn==0.12.2
 tailer==0.4.1
+gunicorn==23.0.0
+eventlet==0.36.0
