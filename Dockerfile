@@ -6,7 +6,7 @@ ENV PYTHONPATH=/app
 
 WORKDIR /app
 
-# Install system dependencies required for matplotlib and other packages
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
     gcc \
     python3-dev \
@@ -17,10 +17,10 @@ RUN apt-get update && apt-get install -y \
     libpng-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Upgrade pip and install dependencies as root
+# Upgrade pip and install dependencies
 RUN python3 -m pip install --no-cache-dir --upgrade pip
 COPY requirements.txt .
-RUN python3 -m pip install --no-cache-dir -v -r requirements.txt
+RUN python3 -m pip install --no-cache-dir --verbose -r requirements.txt || { echo "pip install failed"; exit 1; }
 
 COPY . .
 
