@@ -43,8 +43,8 @@ EXCLUDED_PREFIXES = [
 def is_excluded_query(query: str) -> bool:
     """Check if a query should be excluded from monitoring"""
     query_lower = query.lower()
-    return (any(query_lower == excluded_query.lower() for excluded_query in EXCLUDED_QUERIES) or \
-           (any(query_lower.startswith(prefix.lower()) for prefix in EXCLUDED_PREFIXES)
+    return (any(query_lower == excluded_query.lower() for excluded_query in EXCLUDED_QUERIES) or
+            any(query_lower.startswith(prefix.lower()) for prefix in EXCLUDED_PREFIXES))
 
 def fetch_database_performance(db_name: str = None) -> Dict[str, Any]:
     """Fetch performance metrics for the specified database"""
@@ -73,7 +73,7 @@ def fetch_database_performance(db_name: str = None) -> Dict[str, Any]:
         cursor.close()
         return performance_stats
     
-    except Error as e:
+    except Exception as e:
         print(f"Error fetching performance data: {e}")
         return performance_stats
     finally:
@@ -173,7 +173,7 @@ def update_daily_stats(timestamp: str, query: str) -> None:
             daily_query_stats[query_date]["ALTER"] += 1
         elif query_upper.startswith("DROP"):
             daily_query_stats[query_date]["DROP"] += 1
-    except:
+    except Exception:
         pass
 
 def fetch_process_list(db_name: str = None) -> Tuple[List[Tuple], List[Tuple], Dict[str, Dict[str, int]]]:
@@ -230,7 +230,7 @@ def fetch_process_list(db_name: str = None) -> Tuple[List[Tuple], List[Tuple], D
         
         return list(query_history), query_logs, daily_query_stats
     
-    except Error as e:
+    except Exception as e:
         print(f"Error during fetch or emit: {e}")
         return list(query_history), [], daily_query_stats
     finally:
