@@ -1,0 +1,128 @@
+<!-- templates/database_selector.html -->
+<div class="database-selector">
+    <h3>Database Monitoring</h3>
+    
+    <div class="current-database">
+        Current: <span id="current-db-name">None</span>
+    </div>
+    
+    <div class="database-list">
+        <ul id="database-list">
+            <!-- Databases will be populated here -->
+        </ul>
+    </div>
+    
+    <button id="add-db-btn" class="btn btn-primary">Add Database</button>
+    
+    <div id="add-db-form" style="display: none;">
+        <div class="form-group">
+            <label>Name:</label>
+            <input type="text" id="db-name" class="form-control">
+        </div>
+        <div class="form-group">
+            <label>Host:</label>
+            <input type="text" id="db-host" class="form-control">
+        </div>
+        <div class="form-group">
+            <label>Port:</label>
+            <input type="number" id="db-port" class="form-control" value="3306">
+        </div>
+        <div class="form-group">
+            <label>Username:</label>
+            <input type="text" id="db-user" class="form-control" value="root">
+        </div>
+        <div class="form-group">
+            <label>Password:</label>
+            <input type="password" id="db-password" class="form-control">
+        </div>
+        <button id="save-db-btn" class="btn btn-success">Save</button>
+        <button id="cancel-db-btn" class="btn btn-secondary">Cancel</button>
+    </div>
+</div>
+
+<script>
+$(document).ready(function() {
+    // Load databases
+    function loadDatabases() {
+        $.get('/databases', function(data) {
+            $('#database-list').empty();
+            data.databases.forEach(db => {
+                const activeClass = db.active ? 'active' : '';
+                $('#database-list').append(`
+                    <li class="${activeClass}">
+                        ${db.name} (${db.host}:${db.port})
+                        <button class="btn btn-sm btn-primary switch-db" data-name="${db.name}">
+                            ${db.active ? 'Monitoring' : 'Switch To'}
+                        </button>
+                        <button class="btn btn-sm btn-danger remove-db" data-name="${db.name}">
+                            Remove
+                        </button>
+                    </li>
+                `);
+            });
+            $('#current-db-name').text(data.current || 'None');
+        });
+    }
+    
+    // Switch database
+    $(document).on('click', '.switch-db', function() {
+        const dbName = $(this).data('name');
+        $.post('/databases', {
+            action: 'switch',
+            name: dbName
+        }, function() {
+            loadDatabases();
+            // Refresh monitoring data
+            socket.emit('force_refresh');
+        });
+    });
+    
+    // Remove database
+    $(document).on('click', '.remove-db', function() {
+        if (confirm('Are you sure you want to remove this database?')) {
+            const dbName = $(this).data('name');
+            $.post('/databases', {
+                action: 'remove',
+                name: dbName
+            }, loadDatabases);
+        }
+    });
+    
+    // Show add form
+    $('#add-db-btn').click(function() {
+        $('#add-db-form').show();
+        $(this).hide();
+    });
+    
+    // Hide add form
+    $('#cancel-db-btn').click(function() {
+        $('#add-db-form').hide();
+        $('#add-db-btn').show();
+    });
+    
+    // Save new database
+    $('#save-db-btn').click(function() {
+        const dbConfig = {
+            action: 'add',
+            name: $('#db-name').val(),
+            host: $('#db-host').val(),
+            port: $('#db-port').val(),
+            user: $('#db-user').val(),
+            password: $('#db-password').val()
+        };
+        
+        $.post('/databases', dbConfig, function() {
+            loadDatabases();
+            $('#add-db-form').hide();
+            $('#add-db-btn').show();
+            // Clear form
+            $('#db-name, #db-host, #db-port, #db-user, #db-password').val('');
+            $('#db-port').val('3306');
+            $('#db-user').val('root');
+        });
+    });
+    
+    // Initial load
+    loadDatabases();
+});
+</script>

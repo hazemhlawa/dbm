@@ -11,6 +11,8 @@ from flask_login import LoginManager, current_user, login_user, login_required, 
 import os
 
 app = Flask(__name__)
+socketio = SocketIO(app)
+db_manager = DatabaseManager()
 app.secret_key = 'your_secret_key'  # Needed for session management
 Bootstrap(app)
 
@@ -18,7 +20,6 @@ app.register_blueprint(dashboard_bp, url_prefix='/dashboard')
 app.register_blueprint(monitor_bp, url_prefix='/monitor')
 app.register_blueprint(management_bp, url_prefix='/management')
 
-socketio = SocketIO(app)
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -63,6 +64,70 @@ def login():
 def logout():
     logout_user()
     return redirect(url_for('login'))
+
+@app.route('/databases', methods=['GET', 'POST'])
+def manage_databases():
+    if request.method == 'POST':
+        data = request.json
+        action = data.get('action')
+        
+        if action == 'add':
+            config = DatabaseConfig(
+                name=data['name'],
+                host=data['host'],
+                port=data.get('port', 3306),
+                user=data.get('user', 'root'),
+                password=data.get('password', ''),
+                databases=data.get('databases', [])
+            )
+            db_manager.add_database(config)
+            return jsonify({'status': 'success'})
+        
+        elif action == 'remove':
+            db_manager.remove_database(data['name'])
+            return jsonify({'status': 'success'})
+        
+        elif action == 'switch':
+            if db_manager.set_current_db(data['name']):
+                return jsonify({'status': 'success'})
+            return jsonify({'status': 'error', 'message': 'Database not found'}), 404
+    
+    # GET request - return all databases
+    databases = db_manager.get_all_databases()
+    current_db = db_manager.get_current_db()
+    return jsonify({
+        'databases': [{
+            'name': db.name,
+            'host': db.host,
+            'port': db.port,
+            'active': db.name == current_db.name if current_db else False
+        } for db in databases],
+        'current': current_db.name if current_db else None
+    })
+
+def background_monitoring():
+    """Background task to monitor the current database"""
+    while True:
+        try:
+            current_db = db_manager.get_current_db()
+            if current_db:
+                # Get and emit monitoring data
+                process_data, query_logs, daily_stats = fetch_process_list()
+                performance_data = fetch_database_performance()
+                
+                socketio.emit('monitoring_data', {
+                    'processes': process_data,
+                    'queries': query_logs,
+                    'performance': performance_data,
+                    'daily_stats': daily_stats,
+                    'database': current_db.name
+                })
+        except Exception as e:
+            print(f"Monitoring error: {e}")
+        socketio.sleep(5)
+
+# Start background thread
+threading.Thread(target=background_monitoring, daemon=True).start()
 
 @app.route('/favicon.ico')
 def favicon():
