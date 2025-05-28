@@ -31,4 +31,4 @@ USER dbmuser
 
 EXPOSE 5000
 
-CMD ["python3", "app.py"]
+CMD ["gunicorn", "--worker-class=eventlet", "-w", "1", "--bind", "0.0.0.0:5000", "app:app"]
