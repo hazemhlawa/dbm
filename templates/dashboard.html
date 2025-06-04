@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,8 +10,13 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.2/socket.io.js"></script>
+    <style>
+        .badge-success { background-color: #28a745; }
+        .badge-danger { background-color: #dc3545; }
+        .card { transition: all 0.3s; }
+        .card:hover { transform: translateY(-5px); }
+    </style>
 </head>
-
 <body>
     <div class="wrapper">
         <nav id="sidebar">
@@ -38,17 +42,16 @@
                 </li>
             </ul>
         </nav>
-
         <div id="content">
             <div class="container-fluid">
                 <div class="header">
-                    <h1 class="text-center"><i class="fas fa-chart-bar"></i> Dashboard</h1>
+                    <h1 class="text-center"><i class="fas fa-chart-bar"></i> Database Monitoring Dashboard</h1>
                 </div>
                 <div class="row">
                     <div class="col-md-6 mb-4">
                         <div class="card shadow-sm">
                             <div class="card-body">
-                                <h5 class="card-title">Host Stats</h5>
+                                <h5 class="card-title">Host Statistics</h5>
                                 <canvas id="hostChart"></canvas>
                             </div>
                         </div>
@@ -106,5 +109,4 @@
     <script src="{{ url_for('static', filename='dashboard.js') }}"></script>
     <script src="{{ url_for('static', filename='monitor.js') }}"></script>
 </body>
-
 </html>

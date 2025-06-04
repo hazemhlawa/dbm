@@ -1,75 +1,130 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Real-Time Database Monitor</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.2/socket.io.js"></script>
+    <title>Database Monitoring Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai-sublime.min.css">
+    <style>
+        body { transition: background-color 0.3s, color 0.3s; }
+        .dark-mode { background-color: #1a202c; color: #e2e8f0; }
+        .dark-mode .card { background-color: #2d3748; }
+        .dark-mode .table thead { background-color: #4a5568; }
+        .dark-mode .table tbody tr { background-color: #2d3748; }
+        .dark-mode .table tbody tr:hover { background-color: #4a5568; }
+        .badge { padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.875rem; color: white; }
+        .table th, .table td { padding: 1rem; }
+        pre code.hljs { padding: 1rem; border-radius: 0.5rem; }
+        #queryStatsChart { height: 400px; width: 100%; }
+        .loading { text-align: center; padding: 1rem; color: #6b7280; }
+        .chart-container { position: relative; }
+    </style>
 </head>
-
-<body>
-    <div class="wrapper">
-        <nav id="sidebar">
-            <div class="sidebar-header">
-                <h3>Menu</h3>
-                <button id="sidebarToggle" class="btn btn-outline-light"><i class="fas fa-bars"></i></button>
+<body class="bg-gray-50 font-sans">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-indigo-900 text-white hidden md:block">
+            <div class="p-4">
+                <h2 class="text-2xl font-bold">DB Monitor</h2>
             </div>
-            <ul class="list-unstyled components">
-                <li>
-                    <a href="/"><i class="fas fa-server"></i> <span class="menu-text">Servers</span></a>
-                </li>
-                <li>
-                    <a href="/dashboard"><i class="fas fa-tachometer-alt"></i> <span class="menu-text">Dashboard</span></a>
-                </li>
-                <li>
-                    <a href="/monitor"><i class="fas fa-chart-line"></i> <span class="menu-text">Monitors</span></a>
-                </li>
-                <li>
-                    <a href="/management"><i class="fas fa-database"></i> <span class="menu-text">Management</span></a>
-                </li>
-                <li>
-                    <a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> <span class="menu-text">Logout</span></a>
-                </li>
-            </ul>
-        </nav>
+            <nav class="mt-4">
+                <a href="/" class="block py-2 px-4 hover:bg-indigo-800"><i class="fas fa-server mr-2"></i>Servers</a>
+                <a href="/dashboard" class="block py-2 px-4 hover:bg-indigo-800"><i class="fas fa-tachometer-alt mr-2"></i>Dashboard</a>
+                <a href="/monitor" class="block py-2 px-4 hover:bg-indigo-800"><i class="fas fa-chart-line mr-2"></i>Monitors</a>
+                <a href="/management" class="block py-2 px-4 hover:bg-indigo-800"><i class="fas fa-database mr-2"></i>Management</a>
+                <a href="{{ url_for('logout') }}" class="block py-2 px-4 hover:bg-indigo-800"><i class="fas fa-sign-out-alt mr-2"></i>Logout</a>
+            </nav>
+        </aside>
 
-        <div id="content">
-            <div class="container-fluid">
-                <div class="header">
-                    <h1 class="text-center"><i class="fas fa-database"></i> Database Activity</h1>
+        <!-- Main Content -->
+        <main class="flex-1 p-8 overflow-auto">
+            <div class="flex justify-between items-center mb-8">
+                <h1 class="text-4xl font-bold text-gray-800">Database Monitoring Dashboard</h1>
+                <div class="flex space-x-4">
+                    <select id="refreshInterval" class="border rounded px-3 py-2 bg-white">
+                        <option value="1000">Refresh: 1s</option>
+                        <option value="5000">Refresh: 5s</option>
+                        <option value="10000">Refresh: 10s</option>
+                    </select>
+                    <button id="darkModeToggle" class="p-2 bg-indigo-500 text-white rounded hover:bg-indigo-600">
+                        <i class="fas fa-moon"></i> Dark Mode
+                    </button>
                 </div>
-                <div class="table-container">
-                    <table class="table table-hover table-bordered">
-                        <thead class="thead-dark">
-                            <tr>
-                                <th>Hostname</th>
-                                <th>ID</th>
-                                <th>User</th>
-                                <th>Host</th>
-                                <th>Database</th>
-                                <th>Command</th>
-                                <th>Process Time</th>
-                                <th>State</th>
-                                <th>Query Time</th>
-                                <th>Executed Query</th>
-                            </tr>
-                        </thead>
-                        <tbody id="data-list">
-                            <!-- Data will be inserted here by script.js -->
-                        </tbody>
-                    </table>
+            </div>
+
+            <!-- Query Overview -->
+            <div class="card bg-white shadow-xl rounded-lg p-8 mb-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-semibold text-gray-700">Query Overview</h2>
+                    <div class="flex space-x-4">
+                        <input id="searchQuery" type="text" class="border rounded px-4 py-2" placeholder="Search queries...">
+                        <select id="queryTypeFilter" class="border rounded px-4 py-2">
+                            <option value="">All Query Types</option>
+                        </select>
+                        <a href="{{ url_for('download_queries') }}" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600">Download Report</a>
+                    </div>
                 </div>
+                <table id="queryTable" class="table w-full">
+                    <thead>
+                        <tr>
+                            <th>Hostname</th>
+                            <th>Process ID</th>
+                            <th>Query Type</th>
+                            <th>Query</th>
+                            <th>Executed Tool</th>
+                            <th>Query Time</th>
+                            <th>Execution Time (ms)</th>
+                            <th>User</th>
+                            <th>Database</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <!-- Query Statistics -->
+            <div class="card bg-white shadow-xl rounded-lg p-8">
+                <h2 class="text-2xl font-semibold text-gray-700 mb-6">Query Activity (Last 60 Seconds)</h2>
+                <div class="loading" id="chartLoading">Loading query activity...</div>
+                <div class="chart-container">
+                    <canvas id="queryStatsChart"></canvas>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal for Query Details -->
+    <div class="modal fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center hidden" id="queryModal">
+        <div class="bg-white dark:bg-gray-800 rounded-lg p-8 w-11/12 md:w-3/4">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-semibold text-gray-700 dark:text-gray-200">Query Details</h3>
+                <button id="closeModal" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="space-y-4">
+                <p><strong>Hostname:</strong> <span id="modalHostname" class="text-gray-600 dark:text-gray-300"></span></p>
+                <p><strong>Process ID:</strong> <span id="modalPid" class="text-gray-600 dark:text-gray-300"></span></p>
+                <p><strong>Query Type:</strong> <span id="modalQueryType" class="text-gray-600 dark:text-gray-300"></span></p>
+                <p><strong>Executed Tool:</strong> <span id="modalExecutedTool" class="text-gray-600 dark:text-gray-300"></span></p>
+                <p><strong>Query:</strong></p>
+                <pre><code id="modalQuery" class="sql"></code></pre>
+                <p><strong>Query Time:</strong> <span id="modalQueryTime" class="text-gray-600 dark:text-gray-300"></span></p>
+                <p><strong>Execution Time (ms):</strong> <span id="modalExecutionTime" class="text-gray-600 dark:text-gray-300"></span></p>
+                <p><strong>User:</strong> <span id="modalUser" class="text-gray-600 dark:text-gray-300"></span></p>
+                <p><strong>Database:</strong> <span id="modalDatabase" class="text-gray-600 dark:text-gray-300"></span></p>
             </div>
         </div>
     </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/socket.io-client@4.7.5/dist/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/sql.min.js"></script>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
-    <script src="{{ url_for('static', filename='sidebar.js') }}"></script>
-    <script src="{{ url_for('static', filename='dashboard.js') }}"></script>
-
 </body>
-
 </html>

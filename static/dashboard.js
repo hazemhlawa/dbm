@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const hostTitle = document.createElement('h5');
             hostTitle.className = 'card-title';
-            hostTitle.textContent = host;
+            hostTitle.textContent = host || 'Unknown Host';
 
             const statusList = document.createElement('ul');
             statusList.className = 'list-group list-group-flush';
@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', function () {
         .then(queryHistory => {
             const hostStats = {};
             queryHistory.forEach(record => {
-                const hostname = record[0];
+                const hostname = record.hostname || 'unknown';
                 hostStats[hostname] = (hostStats[hostname] || 0) + 1;
             });
 
@@ -79,13 +79,8 @@ document.addEventListener('DOMContentLoaded', function () {
     // Initial fetch for query statistics
     fetch('/dashboard/query_stats')
         .then(response => response.json())
-        .then(dailyQueryStats => {
-            const totalQueries = Object.keys(dailyQueryStats).reduce((acc, date) => {
-                Object.entries(dailyQueryStats[date]).forEach(([command, count]) => {
-                    acc[command] = (acc[command] || 0) + count;
-                });
-                return acc;
-            }, {});
+        .then(totalQueries => {
+            console.log('Query stats from /query_stats:', totalQueries); // Debug logging
 
             const labels = Object.keys(totalQueries);
             const sizes = Object.values(totalQueries);
