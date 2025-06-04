@@ -6,8 +6,9 @@ WORKDIR /app
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
-    libmysqlclient-dev \
+    libmariadb-dev-compat \
     gcc \
+    pkg-config \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements file
