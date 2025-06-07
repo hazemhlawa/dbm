@@ -1,11 +1,15 @@
 Flask==2.2.2
-Werkzeug==2.2.3  # Downgrade to a version compatible with Flask 2.2.2
-Flask-SocketIO==5.3.6  # Update to a more recent, stable version
+Werkzeug==2.2.3
+Flask-SocketIO==5.3.6
 Flask-SQLAlchemy==2.5.1
 mysql-connector-python==8.0.25
 Flask-Bootstrap==3.3.7.1
 Flask-Login==0.6.2
 psutil==5.9.5
-matplotlib==3.7.2  # Add for dashboard.py (used for plotting)
-seaborn==0.12.2  # Add for dashboard.py (used for plotting)
-tailer==0.4.1  # Add for utils.py (used for log tailing)
+matplotlib==3.7.2
+seaborn==0.12.2
+tailer==0.4.1
+python-dotenv==0.19.0
+numpy<2.0
+gunicorn==20.1.0
+gevent==23.9.1

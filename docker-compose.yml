@@ -1,0 +1,12 @@
+services:
+  app:
+    image: flask-monitoring-app:latest
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
+    networks:
+      - app-network
+networks:
+  app-network:
+    driver: bridge

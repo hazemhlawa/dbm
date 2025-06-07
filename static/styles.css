@@ -103,8 +103,8 @@ body {
 }
 
 #content.minimized {
-    width: calc(100% - 60px);
-    margin-left: 60px;
+    width: calc(100% - 80px);
+    margin-left: 80px;
 }
 
 .header {
@@ -176,6 +176,43 @@ h1 {
     text-align: left;
 }
 
+.filters {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.filters .form-control {
+    max-width: 300px;
+}
+
+.btn-info {
+    transition: background-color 0.3s ease;
+}
+
+.btn-info:hover {
+    background-color: #0056b3;
+}
+
+.card {
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+    background-color: #343a40;
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.card-body {
+    padding: 1rem;
+}
+
+#queryChart {
+    max-height: 300px;
+}
+
 .container-fluid {
     width: 100%;
     padding: 1rem 2rem;
@@ -196,18 +233,13 @@ h1 {
     }
 }
 
-.card-body canvas {
-    max-width: 100%;
-    height: auto;
-}
-
 @media (max-width: 768px) {
     #sidebar {
         width: 200px;
     }
 
     #sidebar.minimized {
-        width: 60px;
+        width: 80px;
     }
 
     #content {
@@ -216,8 +248,8 @@ h1 {
     }
 
     #content.minimized {
-        width: calc(100% - 60px);
-        margin-left: 60px;
+        width: calc(100% - 80px);
+        margin-left: 80px;
     }
 
     .table th,
@@ -231,6 +263,14 @@ h1 {
 
     .container-fluid {
         padding: 1rem;
+    }
+
+    .filters {
+        flex-direction: column;
+    }
+
+    .filters .form-control {
+        max-width: 100%;
     }
 }
 

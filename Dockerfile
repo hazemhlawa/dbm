@@ -1,31 +1,35 @@
-# Use a multi-arch compatible Python base image
-FROM python:3.12-slim
+# Use a recent Python slim image
+FROM python:3.11-slim
 
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies for mysql-connector-python, matplotlib, and psutil
+# Install system dependencies for MySQL, matplotlib, and seaborn
 RUN apt-get update && apt-get install -y \
     gcc \
-    g++ \
-    make \
-    python3-dev \
+    default-libmysqlclient-dev \
     pkg-config \
     libfreetype6-dev \
     libpng-dev \
-    libjpeg-dev \
-    default-libmysqlclient-dev \
     && rm -rf /var/lib/apt/lists/*
 
-
-# Copy project files
-COPY . .
+# Copy requirements file
+COPY requirements.txt .
 
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Copy the application code
+COPY . .
+
 # Expose port 5000
 EXPOSE 5000
 
-# Command to run the application
-CMD ["python", "app.py"]
+# Set environment variables
+ENV FLASK_ENV=production
+ENV PYTHONUNBUFFERED=1
+ENV PATH="/usr/local/bin:$PATH"
+
+# Run the application with Gunicorn and gevent
+#
+CMD ["gunicorn", "--worker-class", "gevent", "-w", "1", "--bind", "0.0.0.0:5000", "app:app"]
