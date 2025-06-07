@@ -1,4 +1,4 @@
-# Database Monitor (DBM)
+## Database Monitor (DBM)
 
 A real-time database monitoring system built with Python Flask that provides comprehensive monitoring and management capabilities for MySQL databases.
 
