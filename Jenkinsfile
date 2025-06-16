@@ -11,12 +11,12 @@ pipeline {
     stages {
         stage('Clone Repository') {
             steps {
-                git branch: 'dbm-v5', credentialsId: 'github', url: 'https://github.com/hazemhlawa/dbm.git'
+                git branch: 'main', credentialsId: 'github', url: 'https://github.com/hazemhlawa/dbm.git'
             }
         }
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t hazemhlawa/dbm:v5 .'
+                sh 'docker build -t hazemhlawa/dbm:v3.1 .'
             }
         }
         stage('Push to DockerHub') {
